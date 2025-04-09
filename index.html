@@ -21,19 +21,20 @@
     }
     header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
       padding: 1em;
       background: rgba(0, 0, 0, 0.6);
+      position: relative;
     }
     .menu-button {
       font-size: 1.5em;
       cursor: pointer;
+      position: absolute;
+      left: 1em;
     }
     .title {
       font-size: 1.5em;
-      text-align: center;
-      flex: 1;
+      margin: 0 auto;
     }
     .tab {
       display: none;
@@ -110,7 +111,7 @@
           const alt = position.coords.altitude !== null ? `${position.coords.altitude.toFixed(2)} m` : "(keine Höhendaten verfügbar)";
           document.getElementById("location").textContent = `Breite: ${lat}, Länge: ${lon}, Höhe: ${alt}`;
 
-          const apiKey = "7fff3250a026fe0dfdc8fe66844443d0";
+          const apiKey = "DEIN_API_KEY";
           fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=de`)
             .then(response => response.json())
             .then(data => {
