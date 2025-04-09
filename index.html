@@ -80,7 +80,8 @@
         navigator.geolocation.getCurrentPosition(position => {
           const lat = position.coords.latitude.toFixed(5);
           const lon = position.coords.longitude.toFixed(5);
-          document.getElementById("location").textContent = `Breite: ${lat}, Länge: ${lon}`;
+          const alt = position.coords.altitude !== null ? `${position.coords.altitude.toFixed(2)} m` : "(keine Höhendaten verfügbar)";
+          document.getElementById("location").textContent = `Breite: ${lat}, Länge: ${lon}, Höhe: ${alt}`;
 
           // Wetterdaten holen (Beispiel mit OpenWeatherMap)
           const apiKey = "DEIN_API_KEY"; // Trage hier deinen API-Schlüssel ein
@@ -95,6 +96,8 @@
             });
         }, () => {
           document.getElementById("location").textContent = "Standort konnte nicht ermittelt werden.";
+        }, {
+          enableHighAccuracy: true
         });
       } else {
         document.getElementById("location").textContent = "Geolocation wird nicht unterstützt.";
