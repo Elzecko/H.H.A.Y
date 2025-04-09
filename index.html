@@ -84,7 +84,7 @@
           document.getElementById("location").textContent = `Breite: ${lat}, Länge: ${lon}, Höhe: ${alt}`;
 
           // Wetterdaten holen (Beispiel mit OpenWeatherMap)
-          const apiKey = "ca14a1075d7014e8601a8ac1b1fdb0da"; // Trage hier deinen API-Schlüssel ein
+          const apiKey = "7fff3250a026fe0dfdc8fe66844443d0"; // Trage hier deinen API-Schlüssel ein
           fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=de`)
             .then(response => response.json())
             .then(data => {
