@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Höhenmessgerät</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    nav {
+      display: flex;
+      justify-content: space-around;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #222;
+      color: white;
+    }
+    nav button {
+      flex: 1;
+      padding: 1em;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1em;
+    }
+    nav button:hover {
+      background-color: #444;
+    }
+    .tab {
+      display: none;
+      padding: 1em;
+      margin-bottom: 3em;
+    }
+    .active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="home" class="tab active">
+    <h1>Willkommen zur Höhenmessgerät-Webseite</h1>
+    <p>Diese Webseite liefert Echtzeitdaten zu Wetter, Position und mehr.</p>
+  </div>
+
+  <div id="wetter" class="tab">
+    <h2>Aktuelles Wetter</h2>
+    <p id="weather">Lade Wetterdaten...</p>
+  </div>
+
+  <div id="position" class="tab">
+    <h2>Aktuelle Koordinaten</h2>
+    <p id="location">Lade Standort...</p>
+  </div>
+
+  <div id="info" class="tab">
+    <h2>Infos zum Projekt</h2>
+    <p>Ersteller: Dein Name oder Team</p>
+    <p>Dieses Projekt ist Teil des Höhenmessgerät-Systems und zeigt relevante Live-Daten.</p>
+  </div>
+
+  <nav>
+    <button onclick="showTab('home')">Home</button>
+    <button onclick="showTab('wetter')">Wetter</button>
+    <button onclick="showTab('position')">Position</button>
+    <button onclick="showTab('info')">Info</button>
+  </nav>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Standort abrufen
+    function updateLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const lat = position.coords.latitude.toFixed(5);
+          const lon = position.coords.longitude.toFixed(5);
+          document.getElementById("location").textContent = `Breite: ${lat}, Länge: ${lon}`;
+
+          // Wetterdaten holen (Beispiel mit OpenWeatherMap)
+          const apiKey = "DEIN_API_KEY"; // Trage hier deinen API-Schlüssel ein
+          fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=de`)
+            .then(response => response.json())
+            .then(data => {
+              const weatherText = `${data.weather[0].description}, ${data.main.temp} °C`;
+              document.getElementById("weather").textContent = weatherText;
+            })
+            .catch(() => {
+              document.getElementById("weather").textContent = "Wetterdaten konnten nicht geladen werden.";
+            });
+        }, () => {
+          document.getElementById("location").textContent = "Standort konnte nicht ermittelt werden.";
+        });
+      } else {
+        document.getElementById("location").textContent = "Geolocation wird nicht unterstützt.";
+      }
+    }
+
+    // Beim Laden der Seite
+    window.onload = updateLocation;
+  </script>
+</body>
+</html>
