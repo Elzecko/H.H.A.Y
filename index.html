@@ -111,7 +111,7 @@
           const alt = position.coords.altitude !== null ? `${position.coords.altitude.toFixed(2)} m` : "(keine Höhendaten verfügbar)";
           document.getElementById("location").textContent = `Breite: ${lat}, Länge: ${lon}, Höhe: ${alt}`;
 
-          const apiKey = "DEIN_API_KEY";
+          const apiKey = "7fff3250a026fe0dfdc8fe66844443d0";
           fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=de`)
             .then(response => response.json())
             .then(data => {
