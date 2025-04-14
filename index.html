@@ -31,50 +31,64 @@
       cursor: pointer;
       position: absolute;
       left: 1em;
+      z-index: 1001;
     }
     .title {
       font-size: 1.5em;
       margin: 0 auto;
     }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200px;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      padding-top: 4em;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+    }
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    .sidebar button {
+      display: block;
+      width: 100%;
+      padding: 1em;
+      background: none;
+      border: none;
+      color: white;
+      text-align: left;
+      font-size: 1em;
+    }
+    .sidebar button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
     .tab {
       display: none;
       padding: 1em;
+      margin-left: 0;
       margin-bottom: 3em;
       background: rgba(0, 0, 0, 0.5);
     }
     .active {
       display: block;
     }
-    nav {
-      display: flex;
-      justify-content: space-around;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-    }
-    nav button {
-      flex: 1;
-      padding: 1em;
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1em;
-    }
-    nav button:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
   </style>
 </head>
 <body>
   <header>
-    <div class="menu-button" onclick="showTab('home')">☰</div>
+    <div class="menu-button" onclick="toggleSidebar()">☰</div>
     <div class="title">H.H.A.Y</div>
   </header>
 
-  <nav>
-    <button onclick="showTab('wetter')">Wetter</button>
-    <button onclick="showTab('position')">Position</button>
-    <button onclick="showTab('info')">Info</button>
-  </nav>
+  <div class="sidebar" id="sidebar">
+    <button onclick="showTab('home'); toggleSidebar();">Home</button>
+    <button onclick="showTab('wetter'); toggleSidebar();">Wetter</button>
+    <button onclick="showTab('position'); toggleSidebar();">Position</button>
+    <button onclick="showTab('info'); toggleSidebar();">Info</button>
+  </div>
 
   <div id="home" class="tab active">
     <h1>Willkommen bei H.H.A.Y</h1>
@@ -93,11 +107,7 @@
 
   <div id="info" class="tab">
     <h2>Infos zum Projekt</h2>
-    <p>Team:</p>
-    <p>H.H.A.Y</p>
-    <p>- Nathanael Meyer</p>
-    <p>- Kimo Ledermann</p>
-    <p>- Ida Herger</p>
+    <p>Ersteller: Dein Name oder Team</p>
     <p>Dieses Projekt ist Teil des Höhenmessgerät-Systems und zeigt relevante Live-Daten.</p>
   </div>
 
@@ -105,6 +115,10 @@
     function showTab(tabId) {
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
     }
 
     function updateLocation() {
