@@ -61,6 +61,11 @@
       color: white;
       text-align: left;
       font-size: 1em;
+      border-left: 4px solid transparent;
+    }
+    .sidebar button.active-tab {
+      border-left: 4px solid white;
+      font-weight: bold;
     }
     .sidebar button:hover {
       background-color: rgba(255, 255, 255, 0.1);
@@ -84,10 +89,10 @@
   </header>
 
   <div class="sidebar" id="sidebar">
-    <button onclick="showTab('home'); toggleSidebar();">Home</button>
-    <button onclick="showTab('wetter'); toggleSidebar();">Wetter</button>
-    <button onclick="showTab('position'); toggleSidebar();">Position</button>
-    <button onclick="showTab('info'); toggleSidebar();">Info</button>
+    <button id="btn-home" onclick="showTab('home'); toggleSidebar();">Home</button>
+    <button id="btn-wetter" onclick="showTab('wetter'); toggleSidebar();">Wetter</button>
+    <button id="btn-position" onclick="showTab('position'); toggleSidebar();">Position</button>
+    <button id="btn-info" onclick="showTab('info'); toggleSidebar();">Info</button>
   </div>
 
   <div id="home" class="tab active">
@@ -119,6 +124,10 @@
     function showTab(tabId) {
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
+
+      document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active-tab'));
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) activeBtn.classList.add('active-tab');
     }
 
     function toggleSidebar() {
@@ -159,7 +168,10 @@
       }
     }
 
-    window.onload = updateLocation;
+    window.onload = () => {
+      updateLocation();
+      showTab('home');
+    };
   </script>
 </body>
 </html>
