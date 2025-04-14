@@ -102,7 +102,7 @@
 
   <div id="wetter" class="tab">
     <h2>Aktuelles Wetter</h2>
-    <p id="weather">Lade Wetterdaten...</p>
+    <div id="weather">Lade Wetterdaten...</div>
   </div>
 
   <div id="position" class="tab">
@@ -147,12 +147,29 @@
             .then(response => response.json())
             .then(data => {
               if (data.cod !== 200) {
-                document.getElementById("weather").textContent = `Fehler: ${data.message}`;
+                document.getElementById("weather").innerHTML = `Fehler: ${data.message}`;
                 console.error("Wetter-API-Fehler:", data);
                 return;
               }
-              const weatherText = `${data.weather[0].description}, ${data.main.temp} °C`;
-              document.getElementById("weather").textContent = weatherText;
+              const weatherHTML = `
+                <p><strong>Ort:</strong> ${data.name}</p>
+                <p><strong>Temperatur:</strong> ${data.main.temp} °C</p>
+                <p><strong>Gefühlt:</strong> ${data.main.feels_like} °C</p>
+                <p><strong>Min/Max:</strong> ${data.main.temp_min} °C / ${data.main.temp_max} °C</p>
+                <p><strong>Luftdruck:</strong> ${data.main.pressure} hPa</p>
+                <p><strong>Luftfeuchtigkeit:</strong> ${data.main.humidity} %</p>
+                <p><strong>Windgeschwindigkeit:</strong> ${data.wind.speed} m/s</p>
+                <p><strong>Windrichtung:</strong> ${data.wind.deg}°</p>
+                <p><strong>Bewölkung:</strong> ${data.clouds.all} %</p>
+                <p><strong>Sichtweite:</strong> ${data.visibility} m</p>
+                <p><strong>Regen:</strong> ${data.rain ? data.rain["1h"] + " mm (1h)" : "Keine Daten"}</p>
+                <p><strong>Schnee:</strong> ${data.snow ? data.snow["1h"] + " mm (1h)" : "Keine Daten"}</p>
+                <p><strong>Beschreibung:</strong> ${data.weather[0].description}</p>
+                <p><strong>Wetter-ID:</strong> ${data.weather[0].id}</p>
+                <p><strong>Icon:</strong> <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="Wettericon"></p>
+                <p><strong>UTC-Offset:</strong> ${data.timezone >= 0 ? '+' : '-'}${Math.abs(data.timezone / 3600)}h</p>
+              `;
+              document.getElementById("weather").innerHTML = weatherHTML;
             })
             .catch(err => {
               console.error("Netzwerkfehler:", err);
