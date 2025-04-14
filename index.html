@@ -86,6 +86,7 @@
   <header>
     <div class="menu-button" onclick="toggleSidebar()">☰</div>
     <div class="title">H.H.A.Y</div>
+      <div id="last-updated" style="position: absolute; right: 1em; top: 1em; font-size: 0.9em; color: #ccc;"></div>
   </header>
 
   <div class="sidebar" id="sidebar">
@@ -135,6 +136,10 @@
     }
 
     function updateLocation() {
+      const updateTime = new Date();
+      const hh = String(updateTime.getHours()).padStart(2, '0');
+      const mm = String(updateTime.getMinutes()).padStart(2, '0');
+      document.getElementById("last-updated").textContent = `Letzte Aktualisierung: ${hh}:${mm} Uhr`;
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
           const lat = position.coords.latitude.toFixed(5);
@@ -187,6 +192,7 @@
     window.onload = () => {
       updateLocation();
       showTab('home');
+      setInterval(updateLocation, 5 * 60 * 1000); // Alle 5 Minuten automatisch aktualisieren
     };
   </script>
 </body>
