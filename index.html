@@ -109,6 +109,8 @@
   <div id="position" class="tab">
     <h2>Aktuelle Koordinaten</h2>
     <p id="location">Lade Standort...</p>
+    <h2>Gemessene Höhe</h2>
+    <p id="hoehenwert">Lade Daten...</p>
   </div>
 
   <div id="info" class="tab">
@@ -121,79 +123,121 @@
     <p>Dieses Projekt ist Teil des Höhenmessgerät-Systems und zeigt relevante Live-Daten.</p>
   </div>
 
-  <script>
-    function showTab(tabId) {
-      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
+  <script type="module">
+  // Firebase-SDK laden
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
-      document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active-tab'));
-      const activeBtn = document.getElementById('btn-' + tabId);
-      if (activeBtn) activeBtn.classList.add('active-tab');
-    }
+  // Firebase-Konfiguration
+  const firebaseConfig = {
+    apiKey: "AIzaSyD5lFDbYML0wdKMP87u_vDTkwa3we6k9ww",
+    authDomain: "hoehenmessgeraet.firebaseapp.com",
+    databaseURL: "https://hoehenmessgeraet-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "hoehenmessgeraet",
+    storageBucket: "hoehenmessgeraet.firebasestorage.app",
+    messagingSenderId: "154446328542",
+    appId: "1:154446328542:web:dcd8c13baceb728ac0c84f",
+    measurementId: "G-QQFGLNRPF1"
+  };
 
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
-    }
+  // Firebase initialisieren
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-    function updateLocation() {
-      const updateTime = new Date();
-      const hh = String(updateTime.getHours()).padStart(2, '0');
-      const mm = String(updateTime.getMinutes()).padStart(2, '0');
-      document.getElementById("last-updated").textContent = `Letzte Aktualisierung: ${hh}:${mm} Uhr`;
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-          const lat = position.coords.latitude.toFixed(5);
-          const lon = position.coords.longitude.toFixed(5);
-          const alt = position.coords.altitude !== null ? `${position.coords.altitude.toFixed(2)} m` : "(keine Höhendaten verfügbar)";
-          document.getElementById("location").textContent = `Breite: ${lat}, Länge: ${lon}, Höhe: ${alt}`;
-
-          const apiKey = "7fff3250a026fe0dfdc8fe66844443d0";
-          fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=de`)
-            .then(response => response.json())
-            .then(data => {
-              if (data.cod !== 200) {
-                document.getElementById("weather").innerHTML = `Fehler: ${data.message}`;
-                console.error("Wetter-API-Fehler:", data);
-                return;
-              }
-              const weatherHTML = `
-                <p><strong>Ort:</strong> ${data.name}</p>
-                <p><strong>Temperatur:</strong> ${data.main.temp} °C</p>
-                <p><strong>Gefühlt:</strong> ${data.main.feels_like} °C</p>
-                <p><strong>Min/Max (aktuell):</strong> ${data.main.temp_min} °C / ${data.main.temp_max} °C</p>
-                <p><strong>Luftdruck:</strong> ${data.main.pressure} hPa</p>
-                <p><strong>Luftfeuchtigkeit:</strong> ${data.main.humidity} %</p>
-                <p><strong>Windgeschwindigkeit:</strong> ${data.wind.speed} m/s</p>
-                <p><strong>Windrichtung:</strong> ${data.wind.deg}°</p>
-                <p><strong>Bewölkung:</strong> ${data.clouds.all} %</p>
-                <p><strong>Sichtweite:</strong> ${data.visibility} m</p>
-                <p><strong>Regen:</strong> ${data.rain ? data.rain["1h"] + " mm (1h)" : "Keine Daten"}</p>
-                <p><strong>Schnee:</strong> ${data.snow ? data.snow["1h"] + " mm (1h)" : "Keine Daten"}</p>
-                <p><strong>Beschreibung:</strong> ${data.weather[0].description}</p>
-                <p><strong>Wetter-ID:</strong> ${data.weather[0].id}</p>
-                <p><strong>UTC-Offset:</strong> ${data.timezone >= 0 ? '+' : '-'}${Math.abs(data.timezone / 3600)}h</p>
-              `;
-              document.getElementById("weather").innerHTML = weatherHTML;
-            })
-            .catch(err => {
-              console.error("Netzwerkfehler:", err);
-              document.getElementById("weather").textContent = "Wetterdaten konnten nicht geladen werden.";
-            });
-        }, () => {
-          document.getElementById("location").textContent = "Standort konnte nicht ermittelt werden.";
-        }, {
-          enableHighAccuracy: true
-        });
+  async function ladeFirebaseHoehe() {
+    try {
+      const snapshot = await get(ref(db, "daten"));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        document.getElementById("hoehenwert").innerText = `Gemessene Höhe (ESP32): ${data.hoehe} m`;
       } else {
-        document.getElementById("location").textContent = "Geolocation wird nicht unterstützt.";
+        document.getElementById("hoehenwert").innerText = "Keine Höhendaten gefunden.";
       }
+    } catch (error) {
+      console.error("Firebase-Fehler:", error);
+      document.getElementById("hoehenwert").innerText = "Fehler beim Laden der Gerätedaten.";
     }
+  }
 
-    window.onload = () => {
-      updateLocation();
-      showTab('home');
-      setInterval(updateLocation, 5 * 60 * 1000); // Alle 5 Minuten automatisch aktualisieren
-    };
-  </script>
+  // Alle 60 Sekunden laden
+  setInterval(ladeFirebaseHoehe, 60000);
+  // Beim Start direkt laden
+  ladeFirebaseHoehe();
+</script>
+
+<script>
+  function showTab(tabId) {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+
+    document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active-tab'));
+    const activeBtn = document.getElementById('btn-' + tabId);
+    if (activeBtn) activeBtn.classList.add('active-tab');
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  function updateLocation() {
+    const updateTime = new Date();
+    const hh = String(updateTime.getHours()).padStart(2, '0');
+    const mm = String(updateTime.getMinutes()).padStart(2, '0');
+    document.getElementById("last-updated").textContent = `Letzte Aktualisierung: ${hh}:${mm} Uhr`;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => {
+        const lat = position.coords.latitude.toFixed(5);
+        const lon = position.coords.longitude.toFixed(5);
+        const alt = position.coords.altitude !== null ? `${position.coords.altitude.toFixed(2)} m` : "(keine Höhendaten verfügbar)";
+        document.getElementById("location").textContent = `Breite: ${lat}, Länge: ${lon}, Höhe: ${alt}`;
+
+        const apiKey = "7fff3250a026fe0dfdc8fe66844443d0";
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=de`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.cod !== 200) {
+              document.getElementById("weather").innerHTML = `Fehler: ${data.message}`;
+              console.error("Wetter-API-Fehler:", data);
+              return;
+            }
+            const weatherHTML = `
+              <p><strong>Ort:</strong> ${data.name}</p>
+              <p><strong>Temperatur:</strong> ${data.main.temp} °C</p>
+              <p><strong>Gefühlt:</strong> ${data.main.feels_like} °C</p>
+              <p><strong>Min/Max (aktuell):</strong> ${data.main.temp_min} °C / ${data.main.temp_max} °C</p>
+              <p><strong>Luftdruck:</strong> ${data.main.pressure} hPa</p>
+              <p><strong>Luftfeuchtigkeit:</strong> ${data.main.humidity} %</p>
+              <p><strong>Windgeschwindigkeit:</strong> ${data.wind.speed} m/s</p>
+              <p><strong>Windrichtung:</strong> ${data.wind.deg}°</p>
+              <p><strong>Bewölkung:</strong> ${data.clouds.all} %</p>
+              <p><strong>Sichtweite:</strong> ${data.visibility} m</p>
+              <p><strong>Regen:</strong> ${data.rain ? data.rain["1h"] + " mm (1h)" : "Keine Daten"}</p>
+              <p><strong>Schnee:</strong> ${data.snow ? data.snow["1h"] + " mm (1h)" : "Keine Daten"}</p>
+              <p><strong>Beschreibung:</strong> ${data.weather[0].description}</p>
+              <p><strong>Wetter-ID:</strong> ${data.weather[0].id}</p>
+              <p><strong>UTC-Offset:</strong> ${data.timezone >= 0 ? '+' : '-'}${Math.abs(data.timezone / 3600)}h</p>
+            `;
+            document.getElementById("weather").innerHTML = weatherHTML;
+          })
+          .catch(err => {
+            console.error("Netzwerkfehler:", err);
+            document.getElementById("weather").textContent = "Wetterdaten konnten nicht geladen werden.";
+          });
+      }, () => {
+        document.getElementById("location").textContent = "Standort konnte nicht ermittelt werden.";
+      }, {
+        enableHighAccuracy: true
+      });
+    } else {
+      document.getElementById("location").textContent = "Geolocation wird nicht unterstützt.";
+    }
+  }
+
+  window.onload = () => {
+    updateLocation();
+    showTab('home');
+    setInterval(updateLocation, 5 * 60 * 1000); // Alle 5 Minuten automatisch aktualisieren
+  };
+</script>
 </body>
 </html>
