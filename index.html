@@ -110,7 +110,6 @@
     <h2>Aktuelle Koordinaten</h2>
     <p id="location">Lade Standort...</p>
     <h2>Gemessene Höhe</h2>
-    <p id="hoehenwert">Lade Daten...</p>
     <h3>Sensorwerte</h3>
     <p>OPV-Höhe: <span id="opv_hoehe">-</span></p>
     <p>Analoge Höhe: <span id="analog_hoehe">-</span></p>
@@ -153,24 +152,24 @@
     if (snapshot.exists()) {
       const data = snapshot.val();
 
-      // Optional: fallback für alte Datenstruktur
       if (data.opv_hoehe !== undefined && data.analog_hoehe !== undefined) {
-        document.getElementById("hoehenwert").innerText = "Daten vom Sensor vorhanden:";
         document.getElementById("opv_hoehe").innerText = `${data.opv_hoehe.toFixed(1)} m`;
         document.getElementById("analog_hoehe").innerText = `${data.analog_hoehe.toFixed(1)} m`;
-      } else if (data.hoehe !== undefined) {
-        document.getElementById("hoehenwert").innerText = `Gemessene Höhe (ESP32): ${data.hoehe} m`;
       } else {
-        document.getElementById("hoehenwert").innerText = "Keine gültigen Höhendaten vorhanden.";
+        document.getElementById("opv_hoehe").innerText = "Keine Daten";
+        document.getElementById("analog_hoehe").innerText = "Keine Daten";
       }
     } else {
-      document.getElementById("hoehenwert").innerText = "Keine Höhendaten gefunden.";
+      document.getElementById("opv_hoehe").innerText = "Keine Verbindung";
+      document.getElementById("analog_hoehe").innerText = "Keine Verbindung";
     }
   } catch (error) {
     console.error("Firebase-Fehler:", error);
-    document.getElementById("hoehenwert").innerText = "Fehler beim Laden der Gerätedaten.";
+    document.getElementById("opv_hoehe").innerText = "Fehler";
+    document.getElementById("analog_hoehe").innerText = "Fehler";
   }
 }
+
 
 
   // Alle 10 Sekunden Firebase-Daten laden
