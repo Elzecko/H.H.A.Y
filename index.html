@@ -173,8 +173,8 @@
 }
 
 
-  // Alle 60 Sekunden laden
-  setInterval(ladeFirebaseHoehe, 60000);
+  // Alle 10 Sekunden Firebase-Daten laden
+  setInterval(ladeFirebaseHoehe, 10000); 
   // Beim Start direkt laden
   ladeFirebaseHoehe();
 </script>
@@ -250,7 +250,7 @@
   window.onload = () => {
     updateLocation();
     showTab('home');
-    setInterval(updateLocation, 5 * 60 * 1000); // Alle 5 Minuten automatisch aktualisieren
+    setInterval(updateLocation, 10 * 1000); // Alle 10 Sekunden automatisch aktualisieren
   };
 </script>
 </body>
