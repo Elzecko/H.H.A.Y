@@ -123,6 +123,8 @@
     <p id="wifi_status">Lade WLAN-Status...</p>
     <h3>Geräteinfo</h3>
     <p id="restart_info">Lade Neustartzeit...</p>
+    <h3>Letzte WLAN-Verbindung</h3>
+    <p id="wifi_connect_time">Lade...</p>
 
     <button onclick="resetWifi()">🔁 WLAN-Verbindung neu starten</button>
     <!-- Weitere Buttons könnten hier folgen -->
@@ -222,6 +224,24 @@ async function ladeLetztenRestart() {
     document.getElementById("restart_info").innerText = "Fehler beim Abrufen.";
   }
 }
+
+async function ladeLetzteVerbindung() {
+  try {
+    const snapshot = await get(ref(db, "letzte_verbindung"));
+    if (snapshot.exists()) {
+      document.getElementById("wifi_connect_time").innerText = snapshot.val();
+    } else {
+      document.getElementById("wifi_connect_time").innerText = "Kein Eintrag vorhanden.";
+    }
+  } catch (err) {
+    console.error("Fehler beim Abrufen der WLAN-Zeit:", err);
+    document.getElementById("wifi_connect_time").innerText = "Fehler beim Abrufen.";
+  }
+}
+
+setInterval(ladeLetzteVerbindung, 15000);
+ladeLetzteVerbindung();
+
 
 setInterval(ladeLetztenRestart, 15000); // alle 15 Sekunden
 ladeLetztenRestart();
