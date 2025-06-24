@@ -121,6 +121,8 @@
     <p>Hier kannst du Steuerbefehle an das Gerät senden.</p>
     <h3>Status</h3>
     <p id="wifi_status">Lade WLAN-Status...</p>
+    <h3>Geräteinfo</h3>
+    <p id="restart_info">Lade Neustartzeit...</p>
 
     <button onclick="resetWifi()">🔁 WLAN-Verbindung neu starten</button>
     <!-- Weitere Buttons könnten hier folgen -->
@@ -206,6 +208,24 @@
     console.error("WiFi-Status Fehler:", err);
   }
 }
+
+async function ladeLetztenRestart() {
+  try {
+    const snapshot = await get(ref(db, "letzter_restart"));
+    if (snapshot.exists()) {
+      document.getElementById("restart_info").innerText = snapshot.val();
+    } else {
+      document.getElementById("restart_info").innerText = "Kein Eintrag vorhanden.";
+    }
+  } catch (err) {
+    console.error("Fehler beim Laden des Neustarts:", err);
+    document.getElementById("restart_info").innerText = "Fehler beim Abrufen.";
+  }
+}
+
+setInterval(ladeLetztenRestart, 15000); // alle 15 Sekunden
+ladeLetztenRestart();
+
 
 setInterval(ladeWifiStatus, 10000);
 ladeWifiStatus();
