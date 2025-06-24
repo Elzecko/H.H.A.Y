@@ -135,9 +135,8 @@
   </div>
 
   <script type="module">
-  // Firebase-SDK laden
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
   // Firebase-Konfiguration
   const firebaseConfig = {
@@ -151,56 +150,52 @@
     measurementId: "G-QQFGLNRPF1"
   };
 
-  // Firebase initialisieren
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  // Sensor-Daten abrufen
   async function ladeFirebaseHoehe() {
-  try {
-    const snapshot = await get(ref(db, "daten"));
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-
-      if (data.opv_hoehe !== undefined && data.analog_hoehe !== undefined) {
-        document.getElementById("opv_hoehe").innerText = `${data.opv_hoehe.toFixed(1)} m`;
-        document.getElementById("analog_hoehe").innerText = `${data.analog_hoehe.toFixed(1)} m`;
+    try {
+      const snapshot = await get(ref(db, "daten"));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        if (data.opv_hoehe !== undefined && data.analog_hoehe !== undefined) {
+          document.getElementById("opv_hoehe").innerText = `${data.opv_hoehe.toFixed(1)} m`;
+          document.getElementById("analog_hoehe").innerText = `${data.analog_hoehe.toFixed(1)} m`;
+        } else {
+          document.getElementById("opv_hoehe").innerText = "Keine Daten";
+          document.getElementById("analog_hoehe").innerText = "Keine Daten";
+        }
       } else {
-        document.getElementById("opv_hoehe").innerText = "Keine Daten";
-        document.getElementById("analog_hoehe").innerText = "Keine Daten";
+        document.getElementById("opv_hoehe").innerText = "Keine Verbindung";
+        document.getElementById("analog_hoehe").innerText = "Keine Verbindung";
       }
-    } else {
-      document.getElementById("opv_hoehe").innerText = "Keine Verbindung";
-      document.getElementById("analog_hoehe").innerText = "Keine Verbindung";
+    } catch (error) {
+      console.error("Firebase-Fehler:", error);
+      document.getElementById("opv_hoehe").innerText = "Fehler";
+      document.getElementById("analog_hoehe").innerText = "Fehler";
     }
-  } catch (error) {
-    console.error("Firebase-Fehler:", error);
-    document.getElementById("opv_hoehe").innerText = "Fehler";
-    document.getElementById("analog_hoehe").innerText = "Fehler";
   }
-}
 
+  // WLAN-Reset auslösen
+  async function resetWifi() {
+    try {
+      await set(ref(db, "reset_wifi"), true);
+      alert("📡 WLAN-Neustart wurde ausgelöst.");
+    } catch (error) {
+      alert("⚠️ Fehler beim Senden des Neustarts.");
+      console.error(error);
+    }
+  }
 
+  // globale Funktion für Button-Zugriff
+  window.resetWifi = resetWifi;
 
-  // Alle 10 Sekunden Firebase-Daten laden
-  setInterval(ladeFirebaseHoehe, 10000); 
-  // Beim Start direkt laden
+  // automatische Updates
+  setInterval(ladeFirebaseHoehe, 10000);
   ladeFirebaseHoehe();
-
-
-import { set, ref as dbRef } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-
-async function resetWifi() {
-  try {
-    await set(dbRef(db, "reset_wifi"), true);
-    alert("📡 WLAN-Neustart wurde ausgelöst.");
-  } catch (error) {
-    alert("⚠️ Fehler beim Senden des Neustarts.");
-    console.error(error);
-  }
-}
-
-
 </script>
+
 
 <script>
   function showTab(tabId) {
